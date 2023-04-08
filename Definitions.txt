@@ -1,0 +1,13 @@
+Definitions
+This document is a resource to check definitions of various biology terms. 
+
+
+Shotgun sequencing - single step sequencing process. Shear whole genome. Then each small fragment undergoes sequencing randomly. Remove overlapping sequencing. 
+Scaffold - portion of genome sequence reconstructed from end-sequenced whole-genome shotgun clones. 
+Composed of contigs and gaps
+
+contigs - a contiguous length of genomic sequence in which order of bases known at high confidence level. Put together several little overlapping bits of dna into a longer sequence. 
+Contigs don't have gaps. 
+GaPS - reads from 2 sequenced ends of at least one fragment overlap with other reads in two different contigs.
+
+Scaffold - chain contigs together, separate them with gaps (stuff we don't know). Needs info about relative position and orientation of contigs. 
