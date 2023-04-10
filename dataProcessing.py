@@ -2,14 +2,29 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 import numpy as np
 import random
-def loadFasta(input_file, output_file):
+
+from sklearn.feature_extraction.text import CountVectorizer
+def loadData():
+    dataFiles = loadInputDataLocations()
+    listFileSequences = []
+    for i in range(0, len(dataFiles)):
+        print("before sequence")
+        listSequencesDataFiles = loadFasta(dataFiles[i])
+        listFileSequences.append(listSequencesDataFiles)
+    #keep vectorizer in case want to interpret the data. 
+    #lose the sequential nature of given subsequences doing it this way. 
+    xData, yData, vectorizer = makeCorpusBagOfWords(listFileSequences, 4, 4)
+    print(xData.shape)
+    print(yData.shape)
+    return xData, yData, vectorizer
+def loadFasta(input_file):
     fasta_sequences = SeqIO.parse(open(input_file), 'fasta')
-    count = 0
-    with open(output_file) as out_file:
-        #each should be a Seq object from biopython
-        listSequences = pickFromEachRandomly(fasta_sequences, 1000, 1000)
-    print("length of fasta_sequences: " , len(listSequences))
+    
+    #Should be a list of strings. 
+    listSequences = pickFromEachRandomly(fasta_sequences, 10000, 1000)
     return listSequences
+
+
 def pickFromEachRandomly(fasta_sequences, numberToSample, randomSequenceLength):
     """
     Iterate through the list of fasta sequences, go through each and pick a random 
@@ -39,10 +54,11 @@ def pickFromEachRandomly(fasta_sequences, numberToSample, randomSequenceLength):
         numberOfSubsequences = min(np.random.geometric(pGeom), maxNumberOfSubseqs)
         print("number of subsequences: ", numberOfSubsequences)
         #generate a random integer from 0 to maxNumberOfSubseqs exclusive. This is valid starting indices. 
+        print(maxNumberOfSubseqs)
         arrayIndices = np.random.randint(0, maxNumberOfSubseqs, numberOfSubsequences)
         sequenceList = []
         for i in range(0, arrayIndices.shape[0]):
-            sequenceList.append(Seq(sequence[arrayIndices[i]:arrayIndices[i] + randomSequenceLength]))
+            sequenceList.append(sequence[arrayIndices[i]:arrayIndices[i] + randomSequenceLength])
         listSequences+=sequenceList
 
         #can't think of a faster way to do this for now
@@ -51,11 +67,35 @@ def pickFromEachRandomly(fasta_sequences, numberToSample, randomSequenceLength):
     avgSubstringLength = numSamples/count
     print("average substring length is: ", avgSubstringLength)
     return listSequences
-def kmerEncoding():
+def loadFastaSimple(input_file):
+    fasta_sequences = SeqIO.parse(open(input_file), 'fasta')
+    transformedSequenceData = transformEach(fasta_sequences)
+
+def transformEach(sequences):
+    """
+    Alternative where it does the transformations to the data immediately. 
+    """
+    listJoined = []
+    for sequence in sequences:
+        #join a sequence of words into one long string with spaces to make it so that you can extract. 
+        kmerString = " ".join(kmerEncoding(sequence,4))
+        listJoined.append(kmerString)
+    vectorizer = CountVectorizer()
+    X = vectorizer.fit( raw_documents = listJoined)
+    print("shape of X: ", X.shape)
+    return X
+def customKmerEncode(k):
+    def kmerEncode(sequence):
+        return " ".join([sequence[x:x+k].lower() for x in range(len(sequence) - k + 1)])
+    return kmerEncode
+def kmerEncoding(sequence, k):
+    #break up a single sequence into subsequences of size size. 
+    return [sequence[x:x+k].lower() for x in range(len(sequence) - k + 1)]
+def oneHot(sequence):
     return
-def oneHot():
-    return
-def ordinalEncoding():
+def ordinalEncoding(sequence):
+    #make the A, C, T, G have related numerical values. 
+
     return
 
 def encodeSequenceData():
@@ -63,9 +103,42 @@ def encodeSequenceData():
     #One hot encoding - 4 categories. 
     #Kmer counting - divide it up to get strings of uniform length. 
     return
-def main():
-    #3900 fasta sequences in this file. 
-    input_file = "ncbi_dataset/data/Ursus_Maritimus/Ursus_Maritimus.fna"
-    output_file = "ncbi_dataset/data/Ursus_Maritimus/Ursus_Maritimus.txt"
-    loadFasta(input_file, output_file)
-main()
+def loadInputDataLocations():
+    with open("dataFiles.txt") as f:
+        text = f.readlines()
+    links = [link.strip() for link in text]
+    print(links)
+    return links
+
+def makeCorpusBagOfWords(listFileSequences, k, n):
+    vectorizer = CountVectorizer(input="content", ngram_range= (n,n))
+    listVocab = []
+    listkmers =[]
+    for sequenceList in listFileSequences:
+        kmerFunction = customKmerEncode(k)
+        print("Sequence length: ", len(sequenceList))
+        kmerSequence = list(map(kmerFunction, sequenceList))
+        print("Kmer sequence: ", len(kmerSequence))
+        listVocab+=kmerSequence
+        listkmers.append(kmerSequence)
+    vectorizer.fit(listVocab)
+    listArrays = []
+    listClassVectors = []
+    
+    for i in range(0, len(listkmers)):
+        sequenceList = listkmers[i]
+        #should be numSequences by vocabSize
+        #print("seqeunce list: ", sequenceList)
+        X = vectorizer.transform(sequenceList).toarray()
+        classVector = i*np.ones(shape=(X.shape[0], ))
+        listArrays.append(X)
+        listClassVectors.append(classVector)
+        print("X size is: ", X.shape)
+    xArray = np.vstack(listArrays)
+    yArray = np.concatenate(listClassVectors)
+    indices = np.arange(0, xArray.shape[0])
+    np.random.shuffle(indices)
+    xShuffled = xArray[indices, :]
+    yShuffled = yArray[indices]
+    return xShuffled, yShuffled, vectorizer
+

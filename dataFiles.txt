@@ -1,0 +1,4 @@
+ncbi_dataset/data/Ursus_Maritimus/Ursus_Maritimus.fna
+ncbi_dataset/data/Ursus_Americanus/Ursus_Americanus.fna
+ncbi_dataset/data/Ursus_Arctos/Ursus_Arctos.fna
+ncbi_dataset/data/Ursus_Thibetanus/Ursus_Thibetanus.fna
