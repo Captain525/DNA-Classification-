@@ -48,13 +48,55 @@ def pickFromEachRandomly(fasta_sequences, numberToSample, randomSequenceLength):
         name, sequence = fasta.id, str(fasta.seq)
         #sequenceArray = np.array(list(sequence), dtype=str)
         maxNumberOfSubseqs = len(sequence)- randomSequenceLength
-        print("Max number of subseq: ", maxNumberOfSubseqs)
+        #print("Max number of subseq: ", maxNumberOfSubseqs)
         #number of trials UNTIL a success, so want pGeom to be small. 
-        print("random geometric value: ", np.random.geometric(pGeom))
+        #print("random geometric value: ", np.random.geometric(pGeom))
         numberOfSubsequences = min(np.random.geometric(pGeom), maxNumberOfSubseqs)
-        print("number of subsequences: ", numberOfSubsequences)
+        #print("number of subsequences: ", numberOfSubsequences)
         #generate a random integer from 0 to maxNumberOfSubseqs exclusive. This is valid starting indices. 
-        print(maxNumberOfSubseqs)
+        arrayIndices = np.random.randint(0, maxNumberOfSubseqs, numberOfSubsequences)
+        sequenceList = []
+        for i in range(0, arrayIndices.shape[0]):
+            sequenceList.append(sequence[arrayIndices[i]:arrayIndices[i] + randomSequenceLength])
+        listSequences+=sequenceList
+
+        #can't think of a faster way to do this for now
+        count+=1
+        numSamples+=numberOfSubsequences
+    avgSubstringLength = numSamples/count
+    print("average substring length is: ", avgSubstringLength)
+    return listSequences
+def pickSimpler(fasta_sequences, numberToSample, randomSequenceLength):
+    size = len(fasta_sequences)
+    listSequences = random.shuffle(fasta_sequences)
+    percentTrain = .8
+    pGeom = .05
+    trainCutoff = int(size*percentTrain)
+    testCutoff = size - trainCutoff
+    #divides the total number of desired subsequences by the expected value. 
+    numberSequences = min(int(numberToSample*pGeom), trainCutoff)
+    trainSubset = listSequences[0:numberSequences]
+    testSize = testCutoff
+    testSubset = listSequences[-testSize:]
+    trainSequences = helperSampleFromSequence(trainSubset, randomSequenceLength, numberToSample, pGeom)
+
+    testSequences = helperSampleFromSequence(testSubset, randomSequenceLength,numberToSample, pGeom)
+    return trainSequences, testSequences
+    
+def helperSampleFromSequence(subset, randomSequenceLength, numberToSample, pGeom):
+    numSamples = 0
+    count = 0
+    listSequences = []
+    for sequence in subset:
+        if(numSamples>=numberToSample):
+            break
+        #with probability 1-p skip this one. 
+       
+        sequence = str(sequence.seq)
+        
+        maxNumberOfSubseqs = len(sequence)- randomSequenceLength
+        numberOfSubsequences = min(np.random.geometric(pGeom), maxNumberOfSubseqs)
+        #generate a random integer from 0 to maxNumberOfSubseqs exclusive. This is valid starting indices. 
         arrayIndices = np.random.randint(0, maxNumberOfSubseqs, numberOfSubsequences)
         sequenceList = []
         for i in range(0, arrayIndices.shape[0]):
@@ -111,25 +153,27 @@ def loadInputDataLocations():
     return links
 
 def makeCorpusBagOfWords(listFileSequences, k, n):
-    vectorizer = CountVectorizer(input="content", ngram_range= (n,n))
+    vectorizer = CountVectorizer(input="content", ngram_range= (n,n), dtype= np.int8)
     listVocab = []
     listkmers =[]
     for sequenceList in listFileSequences:
         kmerFunction = customKmerEncode(k)
         print("Sequence length: ", len(sequenceList))
         kmerSequence = list(map(kmerFunction, sequenceList))
-        print("Kmer sequence: ", len(kmerSequence))
+        assert(len(sequenceList)==len(kmerSequence))
         listVocab+=kmerSequence
         listkmers.append(kmerSequence)
     vectorizer.fit(listVocab)
+    print("done fit")
     listArrays = []
     listClassVectors = []
     
     for i in range(0, len(listkmers)):
         sequenceList = listkmers[i]
         #should be numSequences by vocabSize
-        #print("seqeunce list: ", sequenceList)
+        print("size of seq list: ", len(sequenceList))
         X = vectorizer.transform(sequenceList).toarray()
+        print("Post vectorized sequence list length: ", X.shape)
         classVector = i*np.ones(shape=(X.shape[0], ))
         listArrays.append(X)
         listClassVectors.append(classVector)

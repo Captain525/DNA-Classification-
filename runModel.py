@@ -7,6 +7,7 @@ def runModel():
     X, Y, vectorizer = loadData()
     potential_labels = np.unique(Y)
     n_split = 2
+    #"""
     for train_index, test_index in KFold(n_split).split(X):
         x_train, x_test = X[train_index], X[test_index]
         y_train, y_test = Y[train_index], Y[test_index]
@@ -17,6 +18,11 @@ def runModel():
         model.fit(x_train, y_train, epochs=5)
 
         print("Model evaluation: ", model.evaluate(x_test, y_test))
-
+    #"""
+    #XTrain, XTest, YTrain, YTest =  train_test_split([X, Y], test_size = .2)
+    #model = SimpleModel(potential_labels.shape[0])
+    #model.compile(loss="sparse_categorical_crossentropy", optimizer='adam', metrics=['accuracy'])
+    #model.fit(XTrain, YTrain, epochs=5)
+    #print("Model evaluation: ", model.evaluate(XTest, YTest))
 
 runModel()
