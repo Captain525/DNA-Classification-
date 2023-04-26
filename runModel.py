@@ -22,7 +22,7 @@ def runModel():
     """
     #loadDataSimpler(6,1,10000, 10)
     #xTrain,xVal, xTest, yTrain, yVal, yTest= loadData()
-    xTrain, yTrain, xVal, yVal, xTest, yTest, vectorizer = loadDataSimpler(6, 1, 10000, 100)
+    xTrain, yTrain, xVal, yVal, xTest, yTest, vectorizer = loadDataGeneral(6, 1, 10000, 50, True, False, True)
     print("train size: ", xTrain.shape, yTrain.shape)
     print("val size: ", xVal.shape, yVal.shape)
     print("test size: ", xTest.shape, yTest.shape)

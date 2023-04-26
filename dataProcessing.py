@@ -2,170 +2,92 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 import numpy as np
 import random
+import os.path
 import time
-
+import mmh3
 from sklearn.feature_extraction.text import CountVectorizer
+from chooseMethods import pickAlternate
+from rollingHash import RollingHash, RollingHashFamily
 
-def loadDataSimpler(k,n, numData, sequenceSize):
+
+def loadDataGeneral(k, n, numData, sequenceSize, checkDuplicates, loadPreviousData, saveData):
     dataFiles = loadInputDataLocations()
-    listFileSequences = []
+    listDataStored = ["trainX.npy", "trainY.npy", "validationX.npy", "validationY.npy", "testX.npy", "testY.npy"]
+    
+    if(loadPreviousData and np.all(np.array([os.path.isfile(value) for value in listDataStored]))):
+        print("Loading prior data")
+        return loadData()
+    listSequences = []
+    cutoff = []
     listSplits = []
-    cutoff=[]
-    listY = []
+    binList = []
+    hashListList = []
     for i in range(0, len(dataFiles)):
-        print("before sequence")
-        fasta_sequences = SeqIO.parse(open(dataFiles[i]), 'fasta')
-        trainSequences, valSequences, testSequences = pickAlternate(fasta_sequences, numData, sequenceSize, True)
-        indexTrain = len(trainSequences)
-        indexVal = len(valSequences) + indexTrain
-        sequences = trainSequences + valSequences + testSequences
-        #FORGOT THE + PREVIOUS HERE PROBLEMS. 
-      
-        """
-        trainY = checkClassesForExamplesAlternate(i, trainSequences)
-        valY = checkClassesForExamplesAlternate(i, valSequences)
-        testY = checkClassesForExamplesAlternate(i, testSequences)
-        """
-        #ignoring this problem for now. 
-        #"""
-        trainY = np.zeros(shape = (len(trainSequences), 4))
-        trainY[:, i] = np.ones(shape = (len(trainSequences)))
-        valY = np.zeros(shape = (len(valSequences), 4))
-        valY[:, i] = np.ones(shape = (len(valSequences)))
-        testY = np.zeros(shape = (len(testSequences), 4))
-        testY[:, i] = np.ones(shape = (len(testSequences)))
-        #"""
-        listY.append([trainY, valY, testY])
+        #iterator over sequence objects. Each sequence object is a given size. 
+        fasta_sequences = SeqIO.parse(open(dataFiles[i], 'r'), 'fasta')
+        #could maybe use minhash to see which sequences already in data? 
+
+        trainSeq, valSeq, testSeq, bin, hashList = genericPickMethod(fasta_sequences, numData, sequenceSize, checkDuplicates)
+        binList.append(bin)
+        hashListList.append(hashList)
+        indexTrain = len(trainSeq)
+        indexVal = len(valSeq) + indexTrain
+        sequences = trainSeq+ valSeq + testSeq
+        
+        listSequences.append(sequences)
         previous = 0
         if(i>0):
             previous = cutoff[i-1]
         cutoff.append(len(sequences) + previous)
-        listFileSequences.append(sequences)
         listSplits.append([previous, previous + indexTrain, previous + indexVal, cutoff[i]])
-        
-    
-    xData, yData, vectorizer = makeCorpusBagOfWords(listFileSequences, k, n)
+    yData = genY(listSequences, hashListList, binList)
+    xData,__, vectorizer = makeCorpusBagOfWords(listSequences, k, n)
+    return splitXY(xData, yData, listSplits)
+def genericPickMethod(fasta_sequences, numberToSample, sequenceLength, replaceLater):
+    n = 10000
+    k = 100
+    bin, hashList = minhash(fasta_sequences, sequenceLength,n, k)
+    return pickAlternate(fasta_sequences, numberToSample, sequenceLength, replaceLater), bin, hashList
+
+def genY(listSequences, hashListList, binList):
+    listY = []
+    for index in range(len(listSequences)):
+        sequences = listSequences[index]
+        listY.append(checkHashes(sequences, binList, hashListList, index))
+    Y = np.vstack(listY)
+    return Y
+def splitXY(xData, yData, listSplits):
+    n = len(listSplits)
     trainXList = []
     trainYList = []
     valXList = []
     valYList = []
     testXList = []
     testYList = []
-    for i in range(0, len(dataFiles)):
+    for i in range(0, n):
         splits = listSplits[i]
         trainData = xData[splits[0]:splits[1], :]
         trainXList.append(trainData)
-        #trainDataY = yData[splits[0]:splits[1]]
-        trainDataY = listY[i][0]
+        trainDataY = yData[splits[0]:splits[1], :]
+        
         trainYList.append(trainDataY)
         valData = xData[splits[1]:splits[2], :]
         valXList.append(valData)
-        #valDataY = yData[splits[1]:splits[2]]
-        valDataY = listY[i][1]
+        valDataY = yData[splits[1]:splits[2],:]
         valYList.append(valDataY)
         testData = xData[splits[2]:splits[3], :]
         testXList.append(testData)
-        #testDataY = yData[splits[2]:splits[3]]
-        testDataY = listY[i][2]
+        testDataY = yData[splits[2]:splits[3],:]
         testYList.append(testDataY)
     xTrain = np.vstack(trainXList)
-    
-    #yTrain = np.concatenate(trainYList)
     yTrain = np.vstack(trainYList)
     xVal = np.vstack(valXList)
-    #yVal = np.concatenate(valYList)
     yVal = np.vstack(valYList)
     xTest = np.vstack(testXList)
-    #yTest = np.concatenate(testYList)
     yTest = np.vstack(testYList)
-    saveData(xTrain,xVal, xTest, yTrain, yVal, yTest)
-    firstValueData = xData[0,:]
-    print("length of xdata: ", firstValueData.shape)
-    print("first value of xdata: ", firstValueData)
-    sumBoolVals = np.sum(firstValueData.astype(bool))
-    print("sum of bool vals: ",sumBoolVals)
-    firstLineVectorizer = vectorizer.inverse_transform(xData[0].reshape(1,-1))[0]
-    print("size of line vectorizer: ", firstLineVectorizer.shape)
-    print("vectorizer first line: ", firstLineVectorizer)
-    return xTrain, yTrain, xVal, yVal, xTest, yTest, vectorizer
-
-        
-def pickSimpler(fasta_sequences, numberToSample, randomSequenceLength, replaceLater):
-    """
-    Idea: Have a certain amount of training, val, test data we want. 
-    Iterate through. Assign each sequence as a train val or test sequence. 
-    sample from that sequence. 
-    Once we get past the value we have, we can continue and replace previous data we already sampled to make sure everything
-    is truly random and not biased towards the first half of the dataset. 
-    """
-    #1 over avg desired num of subsequences from a given sequence. 
-    pGeom = .001
-    probReplace = .1
-    percentTrain = .7
-    percentVal = .2
-    percentTest = .1
-    trainNum = percentTrain*numberToSample
-    valNum = percentVal * numberToSample
-    testNum = percentTest*numberToSample
-    trainSeqs = []
-    valSeqs = []
-    testSeqs = []
-    seqTuple = (trainSeqs, valSeqs, testSeqs)
-    numTuple = (trainNum, valNum, testNum)
-    for sequenceF in fasta_sequences:
-        #max number of possible unique subsequences one could take. 
-        maxNumberOfSubseqs = len(sequenceF)- randomSequenceLength
-        if(maxNumberOfSubseqs<=0):
-            continue
-        #print("max subsequence length", maxNumberOfSubseqs)
-        geomValue = np.random.geometric(pGeom)
-        
-        value = random.random()
-        #0 if train, 1 if val, 2 if test. Also works for val size of 0. 
-        choice = int(value>=percentTrain) + int(value>=percentTrain+percentVal)
-        #if have enough and don't want to replace anything, skip
-        if(numTuple[choice]<= len(seqTuple[choice]) and not replaceLater):
-            continue
-        #want to take a certain number of subsequences from this sequence. 
-        sequence = str(sequenceF.seq)
-        #can't take more than max number, no reason to take more than you want. 
-        if(maxNumberOfSubseqs>=2147483647):
-            maxNumberOfSubseqs = 2147483647-1
-        numberSubsequences = min(geomValue, maxNumberOfSubseqs, numTuple[choice])
-        
-        #pick numSubsequence random subsequences now, of fixed size. 
-        #what to do if size bigger than an int? 
-        indexList = np.random.randint(0, maxNumberOfSubseqs, size = numberSubsequences)
-        #don't know faster way. 
-        for i in range(0, indexList.shape[0]):
-            subseq = sequence[indexList[i]:indexList[i] + randomSequenceLength]
-            #in this case, replace a random element. Also there is the option to not replace it. 
-            if(numTuple[choice]<= len(seqTuple[choice])):
-                if(random.random()<probReplace):
-
-                    randIndex = np.random.randint(0, len(seqTuple[choice]))
-                    seqTuple[choice][randIndex] = subseq
-            else:
-                seqTuple[choice].append(subseq)
-
-    return seqTuple[0], seqTuple[1], seqTuple[2]       
-def pickAlternate(fasta_sequences, numberToSample, randomSequenceLength, replaceLater):
-    trainPercent = .7
-    valPercent = .2
-    numSequenceSample = int(numberToSample/randomSequenceLength)
-    listSeqs = []
-    for sequenceF in fasta_sequences:
-        sequence = str(sequenceF.seq)
-        randomIndex = np.random.randint(0, len(sequence) - randomSequenceLength)
-        subseq = sequence[randomIndex: randomIndex + randomSequenceLength]
-        listSeqs.append(subseq)
-    n = len(listSeqs)
-    random.shuffle(listSeqs)
-    trainSeq = listSeqs[0:int(n*trainPercent)]
-    valSeq = listSeqs[int(n*trainPercent):int(n*(trainPercent + valPercent))]
-    testSeq = listSeqs[int(n*(trainPercent + valPercent)):]
-    return trainSeq, valSeq, testSeq
-    
+    if(saveData):
+        saveData(xTrain,xVal, xTest, yTrain, yVal, yTest)
+    return xTrain,yTrain, xVal, yVal, xTest, yTest
 def customKmerEncode(k):
     def kmerEncode(sequence):
         return " ".join([sequence[x:x+k].lower() for x in range(len(sequence) - k + 1)])
@@ -222,13 +144,6 @@ def makeCorpusBagOfWords(listFileSequences, k, n):
     #normalization
     xArray = xArray/rowSum[:, np.newaxis]
     yArray = np.concatenate(listClassVectors)
-    """
-    indices = np.arange(0, xArray.shape[0])
-    np.random.shuffle(indices)
-    xShuffled = xArray[indices, :]
-    yShuffled = yArray[indices]
-    return xShuffled, yShuffled, vectorizer
-    """
     return xArray, yArray, vectorizer
 def checkClassesForExamples(bearType, classSequences):
     """
@@ -283,6 +198,109 @@ def checkClassesForExamplesAlternate(bearType, classSequences):
                     arrayIn[j, i] = 1
                     break
     return arrayIn
+def generatorSequence(sequence, k):
+    """
+    Yields the kmers when we want them, so we don't need to store them all in memory. 
+    """
+    stepsize = 4
+    for i in range(0, (len(sequence) - k)//stepsize):
+        print("I value: ", i)
+        yield sequence[stepsize*i:stepsize*i+k]
+
+def minhashWithRollingHash(fasta_sequences, sequenceSize, n, k):
+    timeStart = time.time()
+    pList = range(20, 20+k)
+    bin = np.zeros(shape =(n, ), dtype=bool)
+    count = 0
+    for sequenceF in fasta_sequences:
+        print("count: ", count)
+        sequence = str(sequenceF.seq)
+        hashFamily = iter(RollingHash(n, pList[0], sequence, sequenceSize))
+        count = count+1
+        try:
+            while(True):
+                bin[next(hashFamily)]=1
+        except StopIteration:
+            break
+        
+    timeEnd = time.time()
+    print("minhash with roll took: ", timeEnd-timeStart)
+    return bin, pList    
+
+           
+def minhash(fasta_sequences, sequenceSize,n, k):
+    """
+    Goal of this is to keep a storage of all possible kmers of a certain size, ie the size of sequences we want to draw, in a given set. 
+    Need a way to be memory efficient, so treating it like a bloom filter. 
+
+    n - number of bits. 
+    k - number of hash functions, independent. 
+
+    Ignoring reverse complements for now. 
+    """
+    print("starting minhash")
+    startTime = time.time()
+    hashList = range(0, k)
+    bin = np.zeros(shape =(n, ), dtype=bool)
+    count = 0
+    for sequence in fasta_sequences:
+        print("On sequence num: ", count)
+        sequenceString = str(sequence.seq)
+        print("length: ", len(sequenceString))
+        gen = generatorSequence(sequenceString, sequenceSize)
+        while(True):
+            try:
+                kmer = next(gen)
+               # print("Kmer: ", kmer, "\n")
+
+                #generates values in huge range. 
+                hashValues = hashKmer(kmer, hashList, n)
+                #print("hash values: ", hashValues)
+                bin[hashValues] = 1
+            except StopIteration:
+                break
+        count = count+1
+    print("done minhash")
+    endTime = time.time()
+    print("Total time: ", endTime - startTime)
+    return bin, hashList
+
+def checkHashes(sequences, binList, hashListList, index):
+    Y = np.zeros(shape = (len(sequences), 4))
+    Y[:, index] = np.ones(shape = (len(sequences)))
+    for i in range(len(binList)):
+        if(i == index):
+            continue
+        bin = binList[i]
+        hashList = hashListList[i]
+        Y[:, i] = checkHashesBin(sequences, bin, hashList)
+    return Y
+def hashesBinGenerator(sequence, bin, hashList):
+    k = len(hashList)
+    n = bin.shape[0]
+    hashValues = hashKmer(sequence, hashList, n)
+    for i in range(0, k):
+        return bin[hashValues[i]]
+def checkHashesBin(sequences, bin, hashList):
+    """
+    Checks if each sequence element is in the given bin, ie in the set. 
+    """
+    Y = np.zeros(shape = (len(sequences), ))
+    for j in range(len(sequences)):
+        sequence = sequences[j]
+        try:
+            gen = hashesBinGenerator(sequence, bin, hashList)
+            while(next(gen)):
+                continue
+        except StopIteration:
+            Y[j] = 1
+    return Y
+
+
+def hashKmer(kmer, hashList, n):
+    hashValues = [mmh3.hash64(kmer, hashList[i])[0]%n for i in hashList]
+    return hashValues
+
 def saveData(trainX, validationX, testX, trainY, validationY, testY):
     print("Shape of training data: ", trainX.shape)
     print("shape of Y data: ", trainY.shape)
@@ -300,7 +318,7 @@ def loadData():
     validationY = np.load("validationY.npy") 
     testY = np.load("testY.npy")
     assert(trainY.shape)
-    return trainX, validationX, testX, trainY, validationY, testY
+    return trainX, trainY, validationX, validationY, testX, testY
 def callLoad():
     trainX, valX, testX, trainY, valY, testY = loadData()
     print("train x shape: ", trainX.shape)
