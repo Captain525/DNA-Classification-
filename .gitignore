@@ -130,3 +130,9 @@ dmypy.json
 
 
 ncbi_dataset/*
+trainY.npy
+trainX.npy
+validationX.npy
+validationY.npy
+testX.npy
+testY.npy

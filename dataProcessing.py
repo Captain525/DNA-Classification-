@@ -2,6 +2,7 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 import numpy as np
 import random
+import time
 
 from sklearn.feature_extraction.text import CountVectorizer
 
@@ -10,15 +11,31 @@ def loadDataSimpler(k,n, numData, sequenceSize):
     listFileSequences = []
     listSplits = []
     cutoff=[]
+    listY = []
     for i in range(0, len(dataFiles)):
         print("before sequence")
         fasta_sequences = SeqIO.parse(open(dataFiles[i]), 'fasta')
-        trainSequences, valSequences, testSequences = pickSimpler(fasta_sequences, numData, sequenceSize, True)
+        trainSequences, valSequences, testSequences = pickAlternate(fasta_sequences, numData, sequenceSize, True)
         indexTrain = len(trainSequences)
         indexVal = len(valSequences) + indexTrain
         sequences = trainSequences + valSequences + testSequences
         #FORGOT THE + PREVIOUS HERE PROBLEMS. 
-        
+      
+        """
+        trainY = checkClassesForExamplesAlternate(i, trainSequences)
+        valY = checkClassesForExamplesAlternate(i, valSequences)
+        testY = checkClassesForExamplesAlternate(i, testSequences)
+        """
+        #ignoring this problem for now. 
+        #"""
+        trainY = np.zeros(shape = (len(trainSequences), 4))
+        trainY[:, i] = np.ones(shape = (len(trainSequences)))
+        valY = np.zeros(shape = (len(valSequences), 4))
+        valY[:, i] = np.ones(shape = (len(valSequences)))
+        testY = np.zeros(shape = (len(testSequences), 4))
+        testY[:, i] = np.ones(shape = (len(testSequences)))
+        #"""
+        listY.append([trainY, valY, testY])
         previous = 0
         if(i>0):
             previous = cutoff[i-1]
@@ -38,23 +55,30 @@ def loadDataSimpler(k,n, numData, sequenceSize):
         splits = listSplits[i]
         trainData = xData[splits[0]:splits[1], :]
         trainXList.append(trainData)
-        trainDataY = yData[splits[0]:splits[1]]
+        #trainDataY = yData[splits[0]:splits[1]]
+        trainDataY = listY[i][0]
         trainYList.append(trainDataY)
         valData = xData[splits[1]:splits[2], :]
         valXList.append(valData)
-        valDataY = yData[splits[1]:splits[2]]
+        #valDataY = yData[splits[1]:splits[2]]
+        valDataY = listY[i][1]
         valYList.append(valDataY)
         testData = xData[splits[2]:splits[3], :]
         testXList.append(testData)
-        testDataY = yData[splits[2]:splits[3]]
+        #testDataY = yData[splits[2]:splits[3]]
+        testDataY = listY[i][2]
         testYList.append(testDataY)
     xTrain = np.vstack(trainXList)
     
-    yTrain = np.concatenate(trainYList)
+    #yTrain = np.concatenate(trainYList)
+    yTrain = np.vstack(trainYList)
     xVal = np.vstack(valXList)
-    yVal = np.concatenate(valYList)
+    #yVal = np.concatenate(valYList)
+    yVal = np.vstack(valYList)
     xTest = np.vstack(testXList)
-    yTest = np.concatenate(testYList)
+    #yTest = np.concatenate(testYList)
+    yTest = np.vstack(testYList)
+    saveData(xTrain,xVal, xTest, yTrain, yVal, yTest)
     firstValueData = xData[0,:]
     print("length of xdata: ", firstValueData.shape)
     print("first value of xdata: ", firstValueData)
@@ -75,8 +99,8 @@ def pickSimpler(fasta_sequences, numberToSample, randomSequenceLength, replaceLa
     is truly random and not biased towards the first half of the dataset. 
     """
     #1 over avg desired num of subsequences from a given sequence. 
-    pGeom = .05
-    probReplace = .5
+    pGeom = .001
+    probReplace = .1
     percentTrain = .7
     percentVal = .2
     percentTest = .1
@@ -111,7 +135,7 @@ def pickSimpler(fasta_sequences, numberToSample, randomSequenceLength, replaceLa
         
         #pick numSubsequence random subsequences now, of fixed size. 
         #what to do if size bigger than an int? 
-        indexList = np.random.randint(0, maxNumberOfSubseqs, numberSubsequences)
+        indexList = np.random.randint(0, maxNumberOfSubseqs, size = numberSubsequences)
         #don't know faster way. 
         for i in range(0, indexList.shape[0]):
             subseq = sequence[indexList[i]:indexList[i] + randomSequenceLength]
@@ -123,8 +147,24 @@ def pickSimpler(fasta_sequences, numberToSample, randomSequenceLength, replaceLa
                     seqTuple[choice][randIndex] = subseq
             else:
                 seqTuple[choice].append(subseq)
-    return seqTuple[0], seqTuple[1], seqTuple[2]       
 
+    return seqTuple[0], seqTuple[1], seqTuple[2]       
+def pickAlternate(fasta_sequences, numberToSample, randomSequenceLength, replaceLater):
+    trainPercent = .7
+    valPercent = .2
+    numSequenceSample = int(numberToSample/randomSequenceLength)
+    listSeqs = []
+    for sequenceF in fasta_sequences:
+        sequence = str(sequenceF.seq)
+        randomIndex = np.random.randint(0, len(sequence) - randomSequenceLength)
+        subseq = sequence[randomIndex: randomIndex + randomSequenceLength]
+        listSeqs.append(subseq)
+    n = len(listSeqs)
+    random.shuffle(listSeqs)
+    trainSeq = listSeqs[0:int(n*trainPercent)]
+    valSeq = listSeqs[int(n*trainPercent):int(n*(trainPercent + valPercent))]
+    testSeq = listSeqs[int(n*(trainPercent + valPercent)):]
+    return trainSeq, valSeq, testSeq
     
 def customKmerEncode(k):
     def kmerEncode(sequence):
@@ -178,6 +218,9 @@ def makeCorpusBagOfWords(listFileSequences, k, n):
         listClassVectors.append(classVector)
         print("X size is: ", X.shape)
     xArray = np.vstack(listArrays)
+    rowSum = np.sum(xArray, axis=1)
+    #normalization
+    xArray = xArray/rowSum[:, np.newaxis]
     yArray = np.concatenate(listClassVectors)
     """
     indices = np.arange(0, xArray.shape[0])
@@ -187,3 +230,83 @@ def makeCorpusBagOfWords(listFileSequences, k, n):
     return xShuffled, yShuffled, vectorizer
     """
     return xArray, yArray, vectorizer
+def checkClassesForExamples(bearType, classSequences):
+    """
+    Given a sequence of data from a class, checks if those sequences occur in any other
+    classes, to check if need multiple labels. 
+
+    Classequences is a list of sequences, where each sequence is a string. 
+
+    """
+    dataFiles = loadInputDataLocations()
+    arrayIn = np.zeros(shape = (len(classSequences), 4))
+    arrayIn[:, bearType] = np.ones(shape = (len(classSequences)))
+    for i in range(len(dataFiles)):
+        if(i == bearType):
+            continue
+        fasta_sequences = SeqIO.parse(open(dataFiles[i]), 'fasta')
+        for sequenceRecord in fasta_sequences:
+            sequence = sequenceRecord.seq
+            print("sequence length: ", len(sequence))
+            found = False
+            for j in range(len(classSequences)):
+                if(found):
+                    break
+                if(j%100 == 0):
+                    print("on sequence: ", j,"/", len(classSequences),"\n")
+                if(sequence.find(classSequences[j])!=-1):
+                    arrayIn[j, i] = 1
+                    found = True
+    return arrayIn
+def checkClassesForExamplesAlternate(bearType, classSequences):
+    """
+    MUCH FASTER THAN standard. Standard straight up doesn't finish. This one 
+    """
+    dataFiles = loadInputDataLocations()
+    arrayIn = np.zeros(shape = (len(classSequences), 4))
+    arrayIn[:, bearType] = np.ones(shape = (len(classSequences)))
+    print(arrayIn)
+    for i in range(len(dataFiles)):
+        if(i == bearType):
+            continue
+        fasta_sequences = SeqIO.parse(open(dataFiles[i]), 'fasta')
+        for j in range(len(classSequences)):
+            found = False
+            if(j%100 == 0):
+                    print("on sequence: ", j,"/", len(classSequences),"\n")
+            classSeq = classSequences[j]
+            for sequenceRecord in fasta_sequences:
+                sequence = sequenceRecord.seq
+                if(sequence.find(classSeq) !=-1):
+                    print("found it")
+                    found = True
+                    arrayIn[j, i] = 1
+                    break
+    return arrayIn
+def saveData(trainX, validationX, testX, trainY, validationY, testY):
+    print("Shape of training data: ", trainX.shape)
+    print("shape of Y data: ", trainY.shape)
+    np.save("trainX", trainX)
+    np.save("validationX", validationX)
+    np.save("testX", testX)
+    np.save("trainY", trainY)
+    np.save("validationY", validationY)
+    np.save("testY", testY)
+def loadData():
+    trainX = np.load("trainX.npy")
+    validationX = np.load("validationX.npy")
+    testX = np.load("testX.npy")
+    trainY = np.load("trainY.npy")
+    validationY = np.load("validationY.npy") 
+    testY = np.load("testY.npy")
+    assert(trainY.shape)
+    return trainX, validationX, testX, trainY, validationY, testY
+def callLoad():
+    trainX, valX, testX, trainY, valY, testY = loadData()
+    print("train x shape: ", trainX.shape)
+    print("trainy shape: ", trainY.shape)
+    print(trainX[0:5])
+    print(trainY[0:5])
+    avgNumberClasses = np.mean(np.sum(trainY, axis=1))
+    print(avgNumberClasses)
+#callLoad()

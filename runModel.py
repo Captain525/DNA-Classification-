@@ -20,16 +20,18 @@ def runModel():
 
         print("Model evaluation: ", model.evaluate(x_test, y_test))
     """
-    xTrain, yTrain, xVal, yVal, xTest, yTest, vectorizer = loadDataSimpler(6,1,10000, 1000)
+    #loadDataSimpler(6,1,10000, 10)
+    #xTrain,xVal, xTest, yTrain, yVal, yTest= loadData()
+    xTrain, yTrain, xVal, yVal, xTest, yTest, vectorizer = loadDataSimpler(6, 1, 10000, 100)
     print("train size: ", xTrain.shape, yTrain.shape)
     print("val size: ", xVal.shape, yVal.shape)
-    print("test size: ", xTest.shape)
-    print("Y test size: ", yTest.shape)
+    print("test size: ", xTest.shape, yTest.shape)
     #maybe should shuffle data here. 
     #hopefully none of the classes aren't ABSENT from this one. 
-    potential_labels = np.unique(yTrain)
-    model = SimpleModel(potential_labels.shape[0])
-    model.compile(loss="sparse_categorical_crossentropy", optimizer='adam',metrics=['accuracy'])
+    numLabels = 4
+    model = SimpleModel(numLabels)
+    model.compile(loss="binary_crossentropy", optimizer='adam',metrics=['accuracy'])
+    print("Y train shape: ", yTrain.shape)
     model.fit(xTrain, yTrain, validation_data = (xTest, yTest), epochs=5)
     print("Model evaluation: ", model.evaluate(xVal, yVal))
 
