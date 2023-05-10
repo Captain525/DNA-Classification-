@@ -67,4 +67,4 @@ def tryOut():
     hash2 = iter(RollingHash(10, 35, sequence, k))
     for i in range(0, 20):
         print(next(hash2))
-tryOut()    
+#tryOut()    

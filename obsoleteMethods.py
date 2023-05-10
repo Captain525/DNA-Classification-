@@ -107,3 +107,31 @@ def transformEach(sequences):
     X = vectorizer.fit( raw_documents = listJoined)
     print("shape of X: ", X.shape)
     return X
+def checkClassesForExamples(bearType, classSequences):
+    """
+    Given a sequence of data from a class, checks if those sequences occur in any other
+    classes, to check if need multiple labels. 
+
+    Classequences is a list of sequences, where each sequence is a string. 
+
+    """
+    dataFiles = loadInputDataLocations()
+    arrayIn = np.zeros(shape = (len(classSequences), 4))
+    arrayIn[:, bearType] = np.ones(shape = (len(classSequences)))
+    for i in range(len(dataFiles)):
+        if(i == bearType):
+            continue
+        fasta_sequences = SeqIO.parse(open(dataFiles[i]), 'fasta')
+        for sequenceRecord in fasta_sequences:
+            sequence = sequenceRecord.seq
+            print("sequence length: ", len(sequence))
+            found = False
+            for j in range(len(classSequences)):
+                if(found):
+                    break
+                if(j%100 == 0):
+                    print("on sequence: ", j,"/", len(classSequences),"\n")
+                if(sequence.find(classSequences[j])!=-1):
+                    arrayIn[j, i] = 1
+                    found = True
+    return arrayIn

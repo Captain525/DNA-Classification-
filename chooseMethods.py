@@ -1,8 +1,5 @@
 import random
 import numpy as np
-
-
-
 def pickSimpler(fasta_sequences, numberToSample, randomSequenceLength, replaceLater):
     """
     Idea: Have a certain amount of training, val, test data we want. 
@@ -62,13 +59,36 @@ def pickSimpler(fasta_sequences, numberToSample, randomSequenceLength, replaceLa
                 seqTuple[choice].append(subseq)
 
     return seqTuple[0], seqTuple[1], seqTuple[2]       
-def pickAlternate(fasta_sequences, numberToSample, randomSequenceLength, replaceLater):
+def pickAlternate(fasta_sequences, numberToSample, randomSequenceLength):
+    """
+    Just picks one subsequence form each sequence. 
+    """
     trainPercent = .7
     valPercent = .2
     numSequenceSample = int(numberToSample/randomSequenceLength)
     listSeqs = []
     for sequenceF in fasta_sequences:
         sequence = str(sequenceF.seq)
+        randomIndex = np.random.randint(0, len(sequence) - randomSequenceLength)
+        subseq = sequence[randomIndex: randomIndex + randomSequenceLength]
+        listSeqs.append(subseq)
+    n = len(listSeqs)
+    random.shuffle(listSeqs)
+    trainSeq = listSeqs[0:int(n*trainPercent)]
+    valSeq = listSeqs[int(n*trainPercent):int(n*(trainPercent + valPercent))]
+    testSeq = listSeqs[int(n*(trainPercent + valPercent)):]
+    return trainSeq, valSeq, testSeq
+
+def pickSimplified(fasta_sequences, numberToSample, randomSequenceLength):
+    """
+    A pick method designed to lessen the amount of data we need to deal with. One way to do this is only sample from the first
+    contig for each sequence. 
+    """
+    sequence = str(fasta_sequences[0].seq)
+    trainPercent = .7
+    valPercent = .2
+    listSeqs = []
+    for i in range(numberToSample):
         randomIndex = np.random.randint(0, len(sequence) - randomSequenceLength)
         subseq = sequence[randomIndex: randomIndex + randomSequenceLength]
         listSeqs.append(subseq)
