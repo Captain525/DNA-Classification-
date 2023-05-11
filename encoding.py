@@ -1,7 +1,7 @@
 
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
-
+from sklearn.preprocessing import LabelBinarizer
 def makeCorpusBagOfWords(listFileSequences, k, n):
     """
     Encodes the sequences into KMERS. 
@@ -43,15 +43,48 @@ def customKmerEncode(k):
 def kmerEncoding(sequence, k):
     #break up a single sequence into subsequences of size size. 
     return [sequence[x:x+k].lower() for x in range(len(sequence) - k + 1)]
-def oneHot(sequence):
-    return
+def makeOneHot(lb):
+    def oneHot(sequence):
+        return lb.transform(list(sequence))
+    return oneHot
 def ordinalEncoding(sequence):
     #make the A, C, T, G have related numerical values. 
+    #Let A = 1 C = 2 T = 3 G = 4
+    return np.array(list(map(ordinalEncode, list(sequence.lower()))))
+    
+def ordinalEncode(c):
+    if(c=="a"):
+        return 1
+    elif(c=="c"):
+        return 2
+    elif(c=="t"):
+        return 3
+    elif(c=="g"):
+        return 4
+    else:
+        return 0
 
-    return
-
-def encodeSequenceData():
+def encodeSequenceData(listFileSequences, choice, k):
     #ordinal encoding - encode each nitrogen base as ordinal value. 
     #One hot encoding - 4 categories. 
     #Kmer counting - divide it up to get strings of uniform length. 
+    if(choice == 0):
+        #one hot encoding. 
+        lb = LabelBinarizer()
+        lb.fit(['a', 'c', 't', 'g'])
+        oneHotMethod = makeOneHot(lb)
+        arrayList =[]
+        for sequenceList in listFileSequences:
+            array = np.row_stack(list(map(oneHotMethod, sequenceList)))
+            arrayList.append(array)
+        encodedSequences = np.concatenate(arrayList, axis=0)
+        print("encoded sequence size: ", encodedSequences.shape)
+        return encodedSequences
+    elif(choice == 1):
+        #ordinal encoding
+        arrayList = []
+        for sequenceList in listFileSequences:
+            array = np.row_stack(list(map(ordinalEncoding, sequenceList)))
+            arrayList.append(array)
+        encodedSequences = np.en
     return

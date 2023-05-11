@@ -5,7 +5,9 @@ from sklearn.model_selection import train_test_split, KFold
 from model import SimpleModel
 print(device_lib.list_local_devices())
 def runModel():
-    xTrain, yTrain, xVal, yVal, xTest, yTest = loadDataGeneral(6, 1, 10000, 1000, checkDuplicates=True, loadPreviousData = False, saveData = True)
+    xTrain, yTrain, xVal, yVal, xTest, yTest = loadDataGeneral(6, 1, 10000, 100, checkDuplicates=False, 
+                                                               loadPreviousData = False, saveData = True, 
+                                                               doMultiple = False, simplified = False)
     print("train size: ", xTrain.shape, yTrain.shape)
     print("val size: ", xVal.shape, yVal.shape)
     print("test size: ", xTest.shape, yTest.shape)

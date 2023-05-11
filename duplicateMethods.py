@@ -1,4 +1,3 @@
-from helperMethods import *
 import numpy as np
 import mmh3
 from Bio import SeqIO
@@ -142,3 +141,10 @@ def checkHashesBin(sequences, bin, hashList):
 def hashKmer(kmer, hashList, n):
     hashValues = [mmh3.hash64(kmer, hashList[i])[0]%n for i in hashList]
     return hashValues
+
+def loadInputDataLocations():
+    with open("dataFiles.txt") as f:
+        text = f.readlines()
+    links = [link.strip() for link in text]
+    print(links)
+    return links

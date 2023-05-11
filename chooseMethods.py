@@ -66,12 +66,21 @@ def pickAlternate(fasta_sequences, numberToSample, randomSequenceLength):
     trainPercent = .7
     valPercent = .2
     numSequenceSample = int(numberToSample/randomSequenceLength)
+    numberPerSequence = 10
     listSeqs = []
+    count = 0
     for sequenceF in fasta_sequences:
+        if(count>numberToSample):
+            break
         sequence = str(sequenceF.seq)
-        randomIndex = np.random.randint(0, len(sequence) - randomSequenceLength)
-        subseq = sequence[randomIndex: randomIndex + randomSequenceLength]
-        listSeqs.append(subseq)
+        #make sure this size is above 0.
+        for i in range(numberPerSequence): 
+            if(count>=numberToSample):
+                break
+            randomIndex = np.random.randint(0, len(sequence) - randomSequenceLength)
+            subseq = sequence[randomIndex: randomIndex + randomSequenceLength]
+            listSeqs.append(subseq)
+            count +=1
     n = len(listSeqs)
     random.shuffle(listSeqs)
     trainSeq = listSeqs[0:int(n*trainPercent)]

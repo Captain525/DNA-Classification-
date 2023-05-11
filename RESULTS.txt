@@ -1,0 +1,83 @@
+TRIALS FOR K: MULTIPLE = False
+
+1. K= 10
+numKmers = 717985
+Pretty slow. Especially vectorization step. Needs 171 GB to store the data, so this is infeasible. 
+2. K=8
+numKmers = 66925
+a couple minutes to get ready for training. Uses a ton of memory, but still works. 
+700/700 [==============================] - ETA: 0s - loss: 0.3187 - accuracy: 0.7846input shape:  (None, 66925)
+x shape:  (None, 4)
+700/700 [==============================] - 154s 218ms/step - loss: 0.3187 - accuracy: 0.7846 - val_loss: 0.2970 - val_accuracy: 0.7898
+Epoch 2/5
+700/700 [==============================] - 146s 208ms/step - loss: 0.2499 - accuracy: 0.7998 - val_loss: 0.3013 - val_accuracy: 0.7970
+Epoch 3/5
+700/700 [==============================] - 148s 211ms/step - loss: 0.1615 - accuracy: 0.8682 - val_loss: 0.3471 - val_accuracy: 0.7680
+Epoch 4/5
+700/700 [==============================] - 146s 209ms/step - loss: 0.0870 - accuracy: 0.9530 - val_loss: 0.4288 - val_accuracy: 0.7711
+Epoch 5/5
+700/700 [==============================] - 146s 209ms/step - loss: 0.0454 - accuracy: 0.9819 - val_loss: 0.4922 - val_accuracy: 0.7583
+200/200 [==============================] - 6s 29ms/step - loss: 0.4862 - accuracy: 0.7654
+Model evaluation:  [0.48618245124816895, 0.7654417753219604]
+
+3. K - 6
+numKmers = 4841
+MUCH faster. Much less overfitting.  
+700/700 [==============================] - 12s 16ms/step - loss: 0.3178 - accuracy: 0.7837 - val_loss: 0.2989 - val_accuracy: 0.7908
+Epoch 2/5
+700/700 [==============================] - 11s 15ms/step - loss: 0.2849 - accuracy: 0.7973 - val_loss: 0.2958 - val_accuracy: 0.7917
+Epoch 3/5
+700/700 [==============================] - 11s 16ms/step - loss: 0.2719 - accuracy: 0.7992 - val_loss: 0.2981 - val_accuracy: 0.7929
+Epoch 4/5
+700/700 [==============================] - 11s 16ms/step - loss: 0.2618 - accuracy: 0.8018 - val_loss: 0.3042 - val_accuracy: 0.7973
+Epoch 5/5
+700/700 [==============================] - 11s 15ms/step - loss: 0.2526 - accuracy: 0.8058 - val_loss: 0.3091 - val_accuracy: 0.7839
+200/200 [==============================] - 1s 3ms/step - loss: 0.3090 - accuracy: 0.7850
+Model evaluation:  [0.30899885296821594, 0.784988284111023]
+4. K=4
+415 kmers
+700/700 [==============================] - 2s 2ms/step - loss: 0.3210 - accuracy: 0.7833 - val_loss: 0.3062 - val_accuracy: 0.7858
+Epoch 2/5
+700/700 [==============================] - 1s 2ms/step - loss: 0.3015 - accuracy: 0.7862 - val_loss: 0.3018 - val_accuracy: 0.7870
+Epoch 3/5
+700/700 [==============================] - 1s 2ms/step - loss: 0.2973 - accuracy: 0.7887 - val_loss: 0.2998 - val_accuracy: 0.7904
+Epoch 4/5
+700/700 [==============================] - 1s 2ms/step - loss: 0.2940 - accuracy: 0.7916 - val_loss: 0.2988 - val_accuracy: 0.7926
+Epoch 5/5
+700/700 [==============================] - 1s 2ms/step - loss: 0.2914 - accuracy: 0.7941 - val_loss: 0.2978 - val_accuracy: 0.7926
+200/200 [==============================] - 0s 1ms/step - loss: 0.2933 - accuracy: 0.7930
+Model evaluation:  [0.2932804226875305, 0.7929632663726807]
+
+5. K = 2
+
+
+
+FIXED PROBLEM WITH ALTERNATE METHOD GETTING WEIRD LENGTHS: 
+K=6 with 1 label
+854/854 [==============================] - 13s 15ms/step - loss: 0.5228 - accuracy: 0.3756 - val_loss: 0.5079 - val_accuracy: 0.4013
+Epoch 2/5
+854/854 [==============================] - 12s 14ms/step - loss: 0.4891 - accuracy: 0.4540 - val_loss: 0.5011 - val_accuracy: 0.4085
+Epoch 3/5
+854/854 [==============================] - 12s 14ms/step - loss: 0.4615 - accuracy: 0.5107 - val_loss: 0.5043 - val_accuracy: 0.4249
+Epoch 4/5
+854/854 [==============================] - 12s 14ms/step - loss: 0.4239 - accuracy: 0.5718 - val_loss: 0.5163 - val_accuracy: 0.4262
+Epoch 5/5
+854/854 [==============================] - 12s 14ms/step - loss: 0.3579 - accuracy: 0.6747 - val_loss: 0.5294 - val_accuracy: 0.4454
+244/244 [==============================] - 1s 3ms/step - loss: 0.5444 - accuracy: 0.4338
+Model evaluation:  [0.5444120168685913, 0.43379053473472595]
+
+K=6, WITH multiple labels. 
+852/854 [============================>.] - ETA: 0s - loss: 0.5222 - accuracy: 0.3857input shape:  (None, 4457)
+x shape:  (None, 4)
+854/854 [==============================] - 13s 15ms/step - loss: 0.5222 - accuracy: 0.3858 - val_loss: 0.5049 - val_accuracy: 0.4195
+Epoch 2/5
+854/854 [==============================] - 12s 14ms/step - loss: 0.4876 - accuracy: 0.4612 - val_loss: 0.5044 - val_accuracy: 0.4172
+Epoch 3/5
+854/854 [==============================] - 12s 15ms/step - loss: 0.4635 - accuracy: 0.5072 - val_loss: 0.5064 - val_accuracy: 0.4282
+Epoch 4/5
+854/854 [==============================] - 12s 15ms/step - loss: 0.4346 - accuracy: 0.5563 - val_loss: 0.5157 - val_accuracy: 0.4336
+Epoch 5/5
+854/854 [==============================] - 12s 15ms/step - loss: 0.3892 - accuracy: 0.6288 - val_loss: 0.5321 - val_accuracy: 0.4323
+244/244 [==============================] - 1s 3ms/step - loss: 0.5513 - accuracy: 0.4140
+Model evaluation:  [0.5513476729393005, 0.4140494763851166]
+

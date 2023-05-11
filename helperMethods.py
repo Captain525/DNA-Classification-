@@ -1,6 +1,6 @@
 import numpy as np
 from duplicateMethods import *
-def genY(listSequences, hashListList, binList, checkDuplicates):
+def genY(listSequences, hashListList, binList, checkDuplicates, doMultiple):
     """
     Generates Y data. Allows for versatility with the minhash algorithm, as well as doing it a slightly different way. 
     """
@@ -8,7 +8,15 @@ def genY(listSequences, hashListList, binList, checkDuplicates):
     #goes across the whole length of total sequences. 
     for index in range(len(listSequences)):
         sequences = listSequences[index]
-        listY.append(checkHashes(sequences, binList, hashListList, index, checkDuplicates))
+        if(checkDuplicates):
+            listY.append(checkHashes(sequences, binList, hashListList, index, checkDuplicates))
+        elif(doMultiple):
+            listY.append(checkClassesForExamplesAlternate(index, sequences))
+        else:
+            #just one label. 
+            zeros = np.zeros(shape=(len(sequences), len(listSequences)))
+            zeros[:, index] = np.ones(shape = (len(sequences), ))
+            listY.append(zeros)
     Y = np.vstack(listY)
     return Y
 def splitXY(xData, yData, listSplits, saveDataBool):
@@ -76,6 +84,12 @@ def loadData():
     testY = np.load("testY.npy")
     assert(trainY.shape)
     return trainX, trainY, validationX, validationY, testX, testY
+def loadInputDataLocations():
+    with open("dataFiles.txt") as f:
+        text = f.readlines()
+    links = [link.strip() for link in text]
+    print(links)
+    return links
 def callLoad():
     trainX, valX, testX, trainY, valY, testY = loadData()
     print("train x shape: ", trainX.shape)
@@ -85,9 +99,3 @@ def callLoad():
     avgNumberClasses = np.mean(np.sum(trainY, axis=1))
     print(avgNumberClasses)
 
-def loadInputDataLocations():
-    with open("dataFiles.txt") as f:
-        text = f.readlines()
-    links = [link.strip() for link in text]
-    print(links)
-    return links

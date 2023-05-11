@@ -13,7 +13,7 @@ from encoding import *
 from duplicateMethods import *
 
 
-def loadDataGeneral(k, n, numData, sequenceSize, checkDuplicates, loadPreviousData, saveData):
+def loadDataGeneral(k, n, numData, sequenceSize, checkDuplicates, loadPreviousData, saveData, doMultiple, simplified):
     """
     General method to ALWAYS call when loading data, has booleans which can set exactly what will happen. 
     """
@@ -35,7 +35,7 @@ def loadDataGeneral(k, n, numData, sequenceSize, checkDuplicates, loadPreviousDa
         fasta_sequences = SeqIO.parse(open(dataFiles[i], 'r'), 'fasta')
 
         #returns training, validation, test sequences. Also returns bins and hash functions if we have the checkDuplicates variable activated.  /
-        trainSeq, valSeq, testSeq, bin, hashList = genericPickMethod(fasta_sequences, numData, sequenceSize, checkDuplicates)
+        trainSeq, valSeq, testSeq, bin, hashList = genericPickMethod(fasta_sequences, numData, sequenceSize, checkDuplicates, simplified)
         binList.append(bin)
         hashListList.append(hashList)
         indexTrain = len(trainSeq)
@@ -48,12 +48,12 @@ def loadDataGeneral(k, n, numData, sequenceSize, checkDuplicates, loadPreviousDa
             previous = cutoff[i-1]
         cutoff.append(len(sequences) + previous)
         listSplits.append([previous, previous + indexTrain, previous + indexVal, cutoff[i]])
-    yData = genY(listSequences, hashListList, binList, checkDuplicates)
+    yData = genY(listSequences, hashListList, binList, checkDuplicates, doMultiple)
     #makes kmers. 
     xData,__, vectorizer = makeCorpusBagOfWords(listSequences, k, n)
     return splitXY(xData, yData, listSplits, saveData)
 
-def genericPickMethod(fasta_sequences, numberToSample, sequenceLength, checkDuplicates):
+def genericPickMethod(fasta_sequences, numberToSample, sequenceLength, checkDuplicates, simplified):
     """
     A generic pick method which organizes all types of pick methods which will be called. 
     If checkDuplicates is true, it runs minhash to see if everything works. 
@@ -62,11 +62,9 @@ def genericPickMethod(fasta_sequences, numberToSample, sequenceLength, checkDupl
     k = 1
     bin = None
     hashList = None
-    simplified = True
     if(simplified):
         fasta_sequences = [fasta_sequences.__next__()]
     if(checkDuplicates):
-        
         bin, hashList = minhash(fasta_sequences, sequenceLength,n, k)
     #pick simplified works way worse than pick alternate. 
     if(simplified):
