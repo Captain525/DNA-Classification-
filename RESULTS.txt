@@ -1,58 +1,5 @@
-TRIALS FOR K: MULTIPLE = False
 
-1. K= 10
-numKmers = 717985
-Pretty slow. Especially vectorization step. Needs 171 GB to store the data, so this is infeasible. 
-2. K=8
-numKmers = 66925
-a couple minutes to get ready for training. Uses a ton of memory, but still works. 
-700/700 [==============================] - ETA: 0s - loss: 0.3187 - accuracy: 0.7846input shape:  (None, 66925)
-x shape:  (None, 4)
-700/700 [==============================] - 154s 218ms/step - loss: 0.3187 - accuracy: 0.7846 - val_loss: 0.2970 - val_accuracy: 0.7898
-Epoch 2/5
-700/700 [==============================] - 146s 208ms/step - loss: 0.2499 - accuracy: 0.7998 - val_loss: 0.3013 - val_accuracy: 0.7970
-Epoch 3/5
-700/700 [==============================] - 148s 211ms/step - loss: 0.1615 - accuracy: 0.8682 - val_loss: 0.3471 - val_accuracy: 0.7680
-Epoch 4/5
-700/700 [==============================] - 146s 209ms/step - loss: 0.0870 - accuracy: 0.9530 - val_loss: 0.4288 - val_accuracy: 0.7711
-Epoch 5/5
-700/700 [==============================] - 146s 209ms/step - loss: 0.0454 - accuracy: 0.9819 - val_loss: 0.4922 - val_accuracy: 0.7583
-200/200 [==============================] - 6s 29ms/step - loss: 0.4862 - accuracy: 0.7654
-Model evaluation:  [0.48618245124816895, 0.7654417753219604]
-
-3. K - 6
-numKmers = 4841
-MUCH faster. Much less overfitting.  
-700/700 [==============================] - 12s 16ms/step - loss: 0.3178 - accuracy: 0.7837 - val_loss: 0.2989 - val_accuracy: 0.7908
-Epoch 2/5
-700/700 [==============================] - 11s 15ms/step - loss: 0.2849 - accuracy: 0.7973 - val_loss: 0.2958 - val_accuracy: 0.7917
-Epoch 3/5
-700/700 [==============================] - 11s 16ms/step - loss: 0.2719 - accuracy: 0.7992 - val_loss: 0.2981 - val_accuracy: 0.7929
-Epoch 4/5
-700/700 [==============================] - 11s 16ms/step - loss: 0.2618 - accuracy: 0.8018 - val_loss: 0.3042 - val_accuracy: 0.7973
-Epoch 5/5
-700/700 [==============================] - 11s 15ms/step - loss: 0.2526 - accuracy: 0.8058 - val_loss: 0.3091 - val_accuracy: 0.7839
-200/200 [==============================] - 1s 3ms/step - loss: 0.3090 - accuracy: 0.7850
-Model evaluation:  [0.30899885296821594, 0.784988284111023]
-4. K=4
-415 kmers
-700/700 [==============================] - 2s 2ms/step - loss: 0.3210 - accuracy: 0.7833 - val_loss: 0.3062 - val_accuracy: 0.7858
-Epoch 2/5
-700/700 [==============================] - 1s 2ms/step - loss: 0.3015 - accuracy: 0.7862 - val_loss: 0.3018 - val_accuracy: 0.7870
-Epoch 3/5
-700/700 [==============================] - 1s 2ms/step - loss: 0.2973 - accuracy: 0.7887 - val_loss: 0.2998 - val_accuracy: 0.7904
-Epoch 4/5
-700/700 [==============================] - 1s 2ms/step - loss: 0.2940 - accuracy: 0.7916 - val_loss: 0.2988 - val_accuracy: 0.7926
-Epoch 5/5
-700/700 [==============================] - 1s 2ms/step - loss: 0.2914 - accuracy: 0.7941 - val_loss: 0.2978 - val_accuracy: 0.7926
-200/200 [==============================] - 0s 1ms/step - loss: 0.2933 - accuracy: 0.7930
-Model evaluation:  [0.2932804226875305, 0.7929632663726807]
-
-5. K = 2
-
-
-
-FIXED PROBLEM WITH ALTERNATE METHOD GETTING WEIRD LENGTHS: 
+FIXED PROBLEM WITH ALTERNATE METHOD GETTING WEIRD LENGTHS: Seq size = 100, bigger newtork 1000 100, sigmoid etc. Pick alternate. 
 K=6 with 1 label
 854/854 [==============================] - 13s 15ms/step - loss: 0.5228 - accuracy: 0.3756 - val_loss: 0.5079 - val_accuracy: 0.4013
 Epoch 2/5
@@ -66,7 +13,7 @@ Epoch 5/5
 244/244 [==============================] - 1s 3ms/step - loss: 0.5444 - accuracy: 0.4338
 Model evaluation:  [0.5444120168685913, 0.43379053473472595]
 
-K=6, WITH multiple labels. 
+K=6, WITH multiple labels. (and bigger network? )
 852/854 [============================>.] - ETA: 0s - loss: 0.5222 - accuracy: 0.3857input shape:  (None, 4457)
 x shape:  (None, 4)
 854/854 [==============================] - 13s 15ms/step - loss: 0.5222 - accuracy: 0.3858 - val_loss: 0.5049 - val_accuracy: 0.4195
@@ -81,3 +28,214 @@ Epoch 5/5
 244/244 [==============================] - 1s 3ms/step - loss: 0.5513 - accuracy: 0.4140
 Model evaluation:  [0.5513476729393005, 0.4140494763851166]
 
+
+K=7 with single labels and bigger network. MORE OVERFITTING. 
+854/854 [==============================] - 49s 56ms/step - loss: 0.5181 - accuracy: 0.3868 - val_loss: 0.4967 - val_accuracy: 0.4398
+Epoch 2/5
+854/854 [==============================] - 49s 57ms/step - loss: 0.4507 - accuracy: 0.5287 - val_loss: 0.5069 - val_accuracy: 0.4305
+Epoch 3/5
+854/854 [==============================] - 48s 56ms/step - loss: 0.3710 - accuracy: 0.6516 - val_loss: 0.5555 - val_accuracy: 0.4326
+Epoch 4/5
+854/854 [==============================] - 48s 56ms/step - loss: 0.2799 - accuracy: 0.7678 - val_loss: 0.6272 - val_accuracy: 0.4298
+Epoch 5/5
+854/854 [==============================] - 47s 56ms/step - loss: 0.1681 - accuracy: 0.8794 - val_loss: 0.7771 - val_accuracy: 0.4403
+244/244 [==============================] - 2s 8ms/step - loss: 0.7805 - accuracy: 0.4355
+Model evaluation:  [0.7804965972900391, 0.4354569911956787]
+K=7 with multiple labels and bigger network
+854/854 [==============================] - 50s 57ms/step - loss: 0.5216 - accuracy: 0.3812 - val_loss: 0.5013 - val_accuracy: 0.4211
+Epoch 2/5
+854/854 [==============================] - 48s 57ms/step - loss: 0.4566 - accuracy: 0.5197 - val_loss: 0.5064 - val_accuracy: 0.4364
+Epoch 3/5
+854/854 [==============================] - 48s 56ms/step - loss: 0.3766 - accuracy: 0.6424 - val_loss: 0.5481 - val_accuracy: 0.4247
+Epoch 4/5
+854/854 [==============================] - 48s 56ms/step - loss: 0.2870 - accuracy: 0.7550 - val_loss: 0.6143 - val_accuracy: 0.4364
+Epoch 5/5
+854/854 [==============================] - 48s 57ms/step - loss: 0.1786 - accuracy: 0.8717 - val_loss: 0.7811 - val_accuracy: 0.4371
+122/122 [==============================] - 1s 8ms/step - loss: 0.7706 - accuracy: 0.4329
+Model evaluation:  [0.7706419229507446, 0.43285495042800903]
+
+K=4 with bigger network, single labels. 
+854/854 [==============================] - 3s 2ms/step - loss: 0.5352 - accuracy: 0.3552 - val_loss: 0.5201 - val_accuracy: 0.3980
+Epoch 2/5
+854/854 [==============================] - 2s 2ms/step - loss: 0.5177 - accuracy: 0.3952 - val_loss: 0.5155 - val_accuracy: 0.3790
+Epoch 3/5
+854/854 [==============================] - 2s 2ms/step - loss: 0.5119 - accuracy: 0.4039 - val_loss: 0.5126 - val_accuracy: 0.4090
+Epoch 4/5
+854/854 [==============================] - 2s 2ms/step - loss: 0.5072 - accuracy: 0.4167 - val_loss: 0.5097 - val_accuracy: 0.4103
+Epoch 5/5
+854/854 [==============================] - 2s 2ms/step - loss: 0.5017 - accuracy: 0.4259 - val_loss: 0.5089 - val_accuracy: 0.4106
+244/244 [==============================] - 0s 1ms/step - loss: 0.5061 - accuracy: 0.4165
+Model evaluation:  [0.5060850977897644, 0.416485071182251]
+k=4 with bigger network, multiple labels: 
+839/854 [============================>.] - ETA: 0s - loss: 0.5335 - accuracy: 0.3577input shape:  (None, 370)
+x shape:  (None, 4)
+854/854 [==============================] - 3s 3ms/step - loss: 0.5332 - accuracy: 0.3579 - val_loss: 0.5197 - val_accuracy: 0.3842
+Epoch 2/5
+854/854 [==============================] - 2s 2ms/step - loss: 0.5159 - accuracy: 0.3939 - val_loss: 0.5166 - val_accuracy: 0.4028
+Epoch 3/5
+854/854 [==============================] - 2s 2ms/step - loss: 0.5106 - accuracy: 0.4086 - val_loss: 0.5140 - val_accuracy: 0.4026
+Epoch 4/5
+854/854 [==============================] - 2s 2ms/step - loss: 0.5055 - accuracy: 0.4167 - val_loss: 0.5134 - val_accuracy: 0.4010
+Epoch 5/5
+854/854 [==============================] - 2s 2ms/step - loss: 0.5005 - accuracy: 0.4282 - val_loss: 0.5116 - val_accuracy: 0.4051
+122/122 [==============================] - 0s 1ms/step - loss: 0.5059 - accuracy: 0.4111
+Model evaluation:  [0.5058614611625671, 0.411071240901947]
+
+K=2 with bigger network, single labels
+854/854 [==============================] - 2s 2ms/step - loss: 0.5462 - accuracy: 0.3300 - val_loss: 0.5400 - val_accuracy: 0.3596
+Epoch 2/5
+854/854 [==============================] - 1s 2ms/step - loss: 0.5355 - accuracy: 0.3615 - val_loss: 0.5324 - val_accuracy: 0.3680
+Epoch 3/5
+854/854 [==============================] - 1s 2ms/step - loss: 0.5314 - accuracy: 0.3681 - val_loss: 0.5304 - val_accuracy: 0.3767
+Epoch 4/5
+854/854 [==============================] - 1s 2ms/step - loss: 0.5288 - accuracy: 0.3754 - val_loss: 0.5295 - val_accuracy: 0.3719
+Epoch 5/5
+854/854 [==============================] - 1s 2ms/step - loss: 0.5267 - accuracy: 0.3796 - val_loss: 0.5282 - val_accuracy: 0.3842
+244/244 [==============================] - 0s 1ms/step - loss: 0.5273 - accuracy: 0.3794
+Model evaluation:  [0.5273360013961792, 0.37943851947784424]
+
+K=2 with bigger network, multiple labels
+854/854 [==============================] - 2s 2ms/step - loss: 0.5473 - accuracy: 0.3265 - val_loss: 0.5389 - val_accuracy: 0.3484
+Epoch 2/5
+854/854 [==============================] - 1s 2ms/step - loss: 0.5384 - accuracy: 0.3540 - val_loss: 0.5348 - val_accuracy: 0.3667
+Epoch 3/5
+854/854 [==============================] - 1s 2ms/step - loss: 0.5341 - accuracy: 0.3634 - val_loss: 0.5317 - val_accuracy: 0.3748
+Epoch 4/5
+854/854 [==============================] - 1s 2ms/step - loss: 0.5312 - accuracy: 0.3732 - val_loss: 0.5294 - val_accuracy: 0.3764
+Epoch 5/5
+854/854 [==============================] - 1s 2ms/step - loss: 0.5293 - accuracy: 0.3764 - val_loss: 0.5295 - val_accuracy: 0.3750
+122/122 [==============================] - 0s 946us/step - loss: 0.5341 - accuracy: 0.3708
+Model evaluation:  [0.5340564250946045, 0.37083548307418823]
+
+
+TESTING SEQ LENGTH: K=6, bigger network
+SeqSize = 20
+854/854 [==============================] - 13s 15ms/step - loss: 0.5424 - accuracy: 0.3338 - val_loss: 0.5294 - val_accuracy: 0.3589
+Epoch 2/5
+854/854 [==============================] - 12s 14ms/step - loss: 0.5091 - accuracy: 0.4246 - val_loss: 0.5365 - val_accuracy: 0.3570
+Epoch 3/5
+854/854 [==============================] - 12s 14ms/step - loss: 0.4626 - accuracy: 0.5178 - val_loss: 0.5599 - val_accuracy: 0.3480
+Epoch 4/5
+854/854 [==============================] - 12s 14ms/step - loss: 0.3493 - accuracy: 0.7031 - val_loss: 0.6490 - val_accuracy: 0.3480
+Epoch 5/5
+854/854 [==============================] - 12s 14ms/step - loss: 0.1811 - accuracy: 0.8879 - val_loss: 0.8341 - val_accuracy: 0.3435
+122/122 [==============================] - 0s 2ms/step - loss: 0.8405 - accuracy: 0.3421
+Model evaluation:  [0.8405319452285767, 0.34213224053382874]
+
+seqSize = 200 
+852/854 [============================>.] - ETA: 0s - loss: 0.5165 - accuracy: 0.3940input shape:  (None, 4570)
+x shape:  (None, 4)
+854/854 [==============================] - 14s 15ms/step - loss: 0.5164 - accuracy: 0.3941 - val_loss: 0.4997 - val_accuracy: 0.4306
+Epoch 2/5
+854/854 [==============================] - 13s 15ms/step - loss: 0.4777 - accuracy: 0.4740 - val_loss: 0.4905 - val_accuracy: 0.4440
+Epoch 3/5
+854/854 [==============================] - 13s 15ms/step - loss: 0.4525 - accuracy: 0.5238 - val_loss: 0.4947 - val_accuracy: 0.4442
+Epoch 4/5
+854/854 [==============================] - 13s 15ms/step - loss: 0.4285 - accuracy: 0.5643 - val_loss: 0.5067 - val_accuracy: 0.4376
+Epoch 5/5
+854/854 [==============================] - 13s 15ms/step - loss: 0.3955 - accuracy: 0.6152 - val_loss: 0.5113 - val_accuracy: 0.4534
+122/122 [==============================] - 0s 3ms/step - loss: 0.5198 - accuracy: 0.4498
+Model evaluation:  [0.5198444724082947, 0.44976934790611267]
+
+SeqSize = 500
+853/854 [============================>.] - ETA: 0s - loss: 0.5075 - accuracy: 0.4197input shape:  (None, 4830)
+x shape:  (None, 4)
+854/854 [==============================] - 14s 16ms/step - loss: 0.5074 - accuracy: 0.4198 - val_loss: 0.4826 - val_accuracy: 0.4711
+Epoch 2/5
+854/854 [==============================] - 14s 16ms/step - loss: 0.4584 - accuracy: 0.5152 - val_loss: 0.4650 - val_accuracy: 0.4884
+Epoch 3/5
+854/854 [==============================] - 13s 16ms/step - loss: 0.4274 - accuracy: 0.5657 - val_loss: 0.4565 - val_accuracy: 0.5167
+Epoch 4/5
+854/854 [==============================] - 14s 16ms/step - loss: 0.3998 - accuracy: 0.6061 - val_loss: 0.4575 - val_accuracy: 0.5284
+Epoch 5/5
+854/854 [==============================] - 14s 16ms/step - loss: 0.3705 - accuracy: 0.6471 - val_loss: 0.4516 - val_accuracy: 0.5376
+122/122 [==============================] - 0s 3ms/step - loss: 0.4472 - accuracy: 0.5407
+Model evaluation:  [0.447223961353302, 0.5407483577728271]
+seqSize= 1000
+846/848 [============================>.] - ETA: 0s - loss: 0.5011 - accuracy: 0.4316input shape:  (None, 5055)
+x shape:  (None, 4)
+848/848 [==============================] - 15s 17ms/step - loss: 0.5010 - accuracy: 0.4319 - val_loss: 0.4693 - val_accuracy: 0.4829
+Epoch 2/5
+848/848 [==============================] - 14s 16ms/step - loss: 0.4350 - accuracy: 0.5526 - val_loss: 0.4346 - val_accuracy: 0.5550
+Epoch 3/5
+848/848 [==============================] - 14s 16ms/step - loss: 0.3938 - accuracy: 0.6114 - val_loss: 0.4194 - val_accuracy: 0.5668
+Epoch 4/5
+848/848 [==============================] - 14s 16ms/step - loss: 0.3626 - accuracy: 0.6545 - val_loss: 0.4067 - val_accuracy: 0.5965
+Epoch 5/5
+848/848 [==============================] - 14s 16ms/step - loss: 0.3329 - accuracy: 0.6918 - val_loss: 0.3942 - val_accuracy: 0.6202
+122/122 [==============================] - 0s 3ms/step - loss: 0.3983 - accuracy: 0.6135
+Model evaluation:  [0.3983309864997864, 0.6135190725326538]
+
+SeqSize = 2000 pick alternate. 
+845/846 [============================>.] - ETA: 0s - loss: 0.4897 - accuracy: 0.4571input shape:  (None, 5694)
+x shape:  (None, 4)
+846/846 [==============================] - 17s 19ms/step - loss: 0.4897 - accuracy: 0.4572 - val_loss: 0.4494 - val_accuracy: 0.5445
+Epoch 2/5
+846/846 [==============================] - 16s 18ms/step - loss: 0.4219 - accuracy: 0.5708 - val_loss: 0.4069 - val_accuracy: 0.5894
+Epoch 3/5
+846/846 [==============================] - 16s 19ms/step - loss: 0.3795 - accuracy: 0.6301 - val_loss: 0.3926 - val_accuracy: 0.6198
+Epoch 4/5
+846/846 [==============================] - 16s 18ms/step - loss: 0.3487 - accuracy: 0.6682 - val_loss: 0.3797 - val_accuracy: 0.6268
+Epoch 5/5
+846/846 [==============================] - 16s 19ms/step - loss: 0.3247 - accuracy: 0.6944 - val_loss: 0.3911 - val_accuracy: 0.6282
+121/121 [==============================] - 0s 3ms/step - loss: 0.4067 - accuracy: 0.6158
+Model evaluation:  [0.40672391653060913, 0.6157826781272888]
+
+PICK SIMPLER METHOD OVERFITS. (with multiple labels) 500 seq size
+699/700 [============================>.] - ETA: 0s - loss: 0.2530 - accuracy: 0.7820input shape:  (32, 4635)
+x shape:  (32, 4)
+700/700 [==============================] - 11s 15ms/step - loss: 0.2527 - accuracy: 0.7822 - val_loss: 0.9355 - val_accuracy: 0.4984
+Epoch 2/5
+700/700 [==============================] - 11s 15ms/step - loss: 0.0930 - accuracy: 0.9401 - val_loss: 1.3016 - val_accuracy: 0.4427
+Epoch 3/5
+700/700 [==============================] - 11s 15ms/step - loss: 0.0608 - accuracy: 0.9621 - val_loss: 1.3694 - val_accuracy: 0.4494
+Epoch 4/5
+700/700 [==============================] - 11s 15ms/step - loss: 0.0438 - accuracy: 0.9736 - val_loss: 1.4819 - val_accuracy: 0.4377
+Epoch 5/5
+700/700 [==============================] - 11s 15ms/step - loss: 0.0327 - accuracy: 0.9807 - val_loss: 1.8345 - val_accuracy: 0.4273
+100/100 [==============================] - 0s 2ms/step - loss: 2.0815 - accuracy: 0.2925
+Model evaluation:  [2.0814642906188965, 0.29249998927116394]
+PICK simplified(500 seq size) multiple labels
+699/700 [============================>.] - ETA: 0s - loss: 0.3770 - accuracy: 0.5238input shape:  (None, 4803)
+x shape:  (None, 4)
+700/700 [==============================] - 12s 16ms/step - loss: 0.3770 - accuracy: 0.5238 - val_loss: 0.3523 - val_accuracy: 0.5549
+Epoch 2/5
+700/700 [==============================] - 11s 16ms/step - loss: 0.3480 - accuracy: 0.5644 - val_loss: 0.3488 - val_accuracy: 0.5666
+Epoch 3/5
+700/700 [==============================] - 11s 16ms/step - loss: 0.3373 - accuracy: 0.6023 - val_loss: 0.3533 - val_accuracy: 0.5621
+Epoch 4/5
+700/700 [==============================] - 11s 16ms/step - loss: 0.3252 - accuracy: 0.6373 - val_loss: 0.3575 - val_accuracy: 0.5555
+Epoch 5/5
+700/700 [==============================] - 11s 16ms/step - loss: 0.3129 - accuracy: 0.6619 - val_loss: 0.3690 - val_accuracy: 0.5575
+101/101 [==============================] - 0s 3ms/step - loss: 0.3678 - accuracy: 0.5574
+Model evaluation:  [0.3677882254123688, 0.557428240776062]
+
+pick simplifed 100 seq size multiple labels
+700/700 [==============================] - ETA: 0s - loss: 0.3854 - accuracy: 0.5067input shape:  (None, 4334)
+x shape:  (None, 4)
+700/700 [==============================] - 11s 15ms/step - loss: 0.3854 - accuracy: 0.5067 - val_loss: 0.3618 - val_accuracy: 0.5352
+Epoch 2/5
+700/700 [==============================] - 10s 14ms/step - loss: 0.3521 - accuracy: 0.5622 - val_loss: 0.3607 - val_accuracy: 0.5338
+Epoch 3/5
+700/700 [==============================] - 10s 14ms/step - loss: 0.3372 - accuracy: 0.6026 - val_loss: 0.3700 - val_accuracy: 0.5200
+Epoch 4/5
+700/700 [==============================] - 11s 15ms/step - loss: 0.3206 - accuracy: 0.6470 - val_loss: 0.3840 - val_accuracy: 0.5158
+Epoch 5/5
+700/700 [==============================] - 10s 15ms/step - loss: 0.2954 - accuracy: 0.6904 - val_loss: 0.3975 - val_accuracy: 0.5241
+101/101 [==============================] - 0s 3ms/step - loss: 0.3999 - accuracy: 0.5181
+Model evaluation:  [0.3999268412590027, 0.5181023478507996]
+
+#Pick simpler with single labels 100 seq size. 
+698/700 [============================>.] - ETA: 0s - loss: 0.3904 - accuracy: 0.5035input shape:  (None, 4339)
+x shape:  (None, 4)
+700/700 [==============================] - 11s 15ms/step - loss: 0.3903 - accuracy: 0.5038 - val_loss: 0.3632 - val_accuracy: 0.5233
+Epoch 2/5
+700/700 [==============================] - 10s 15ms/step - loss: 0.3508 - accuracy: 0.5652 - val_loss: 0.3594 - val_accuracy: 0.5289
+Epoch 3/5
+700/700 [==============================] - 10s 14ms/step - loss: 0.3370 - accuracy: 0.6074 - val_loss: 0.3640 - val_accuracy: 0.5253
+Epoch 4/5
+700/700 [==============================] - 10s 14ms/step - loss: 0.3216 - accuracy: 0.6438 - val_loss: 0.3827 - val_accuracy: 0.5249
+Epoch 5/5
+700/700 [==============================] - 10s 15ms/step - loss: 0.3005 - accuracy: 0.6833 - val_loss: 0.3903 - val_accuracy: 0.5295
+101/101 [==============================] - 0s 2ms/step - loss: 0.3845 - accuracy: 0.5437
+Model evaluation:  [0.38445597887039185, 0.5436953902244568]

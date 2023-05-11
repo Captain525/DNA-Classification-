@@ -41,7 +41,7 @@ def pickSimpler(fasta_sequences, numberToSample, randomSequenceLength, replaceLa
         #can't take more than max number, no reason to take more than you want. 
         if(maxNumberOfSubseqs>=2147483647):
             maxNumberOfSubseqs = 2147483647-1
-        numberSubsequences = min(geomValue, maxNumberOfSubseqs, numTuple[choice])
+        numberSubsequences =    int( min(geomValue, maxNumberOfSubseqs, numTuple[choice]))
         
         #pick numSubsequence random subsequences now, of fixed size. 
         #what to do if size bigger than an int? 
@@ -73,9 +73,12 @@ def pickAlternate(fasta_sequences, numberToSample, randomSequenceLength):
         if(count>numberToSample):
             break
         sequence = str(sequenceF.seq)
-        #make sure this size is above 0.
+        
         for i in range(numberPerSequence): 
             if(count>=numberToSample):
+                break
+            #make sure this size is above 0.
+            if(len(sequence)<=randomSequenceLength):
                 break
             randomIndex = np.random.randint(0, len(sequence) - randomSequenceLength)
             subseq = sequence[randomIndex: randomIndex + randomSequenceLength]
