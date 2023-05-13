@@ -1,0 +1,22 @@
+There are three methods designed for choosing the data randomly from the genome. Note that the data is structured as a sequence of contigs for each bear type. 
+We want to draw data from those contigs (because contigs are too big). Multiple ways of doing this. 
+
+
+1. PickSimpler - First one i designed, also the most complicated. Focuses on trying to sample the training, test and validation from SEPARATE contigs, 
+to ENSURE that there isn't much overlap between training and test data. HOwever, if there are significant differences in the contigs, this could hinder prediction. 
+
+What we do is this: Iterate through all the contigs in the genome. For each contig, generate a random value geometrically representing the number of samples
+to take from this contig. Also, randomly designate the contig as training, val, or test. Then, using your geometric value, generate that many random indices from the 
+contig, taking them all to be a uniform length randomSequenceLength. 
+
+Once you have enough data(which will be early), you continue to iterate through the dataset, with a random chance of replacing any given existing data point (but train and val must
+match up etc). This is to ensure that the data is sampled randomly from the WHOLE genome, not just the earlier contigs. Once we reach the end, we return the data, which isn't 
+cross polluted. However, the problem with this is that different contigs are much more different than we thought, which made it hard to learn anything. 
+
+2. PickAlternate - Second one designed, much simpler approach(confusing naming i know). What this does is randomly pick one sequence from each contig, then 
+cut off at whatever number of data points we need is. The problem with this approach is it HEAVILY depends on the number of contigs, and if youre not careful can lead to misleading results. Later altered it 
+to do a fixed number of samples from each contig. 
+
+3. PickSimplified(SO CONFUSING WITH THE NAMES) - This was the last one designed, what this one does is that it generates all data from ONLY the first contig of each genome. This makes it so that
+although the data is from a smaller set, it's easier to do things like minhash and to check whether the examples are already in the dataset, bc youre essentially cutting the other
+contigs out. Problem with this is that it might misrepresent the data. 
